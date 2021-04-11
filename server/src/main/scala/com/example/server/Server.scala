@@ -25,8 +25,8 @@ object Server extends Directives {
     else
       WebHandler.defaultCorsSettings
 
-  def startHttpServer()(implicit actorSystem: ActorSystem[_]): Unit =
-    Runtime.default.unsafeRunAsync_(ZIO.fromFuture(_ =>
+  private def startHttpServer()(implicit actorSystem: ActorSystem[_]): Unit =
+    Runtime.default.unsafeRunAsync_(ZIO.fromFuture(executionContext =>
       WebHandler
         .grpcWebHandler(ServiceHandler.partial(
             actorSystem.pipe(system => new ServiceImpl { val actorSystem = system })
@@ -39,7 +39,7 @@ object Server extends Directives {
             )
             .bind(Route.toFunction(concat(
               new WebService().route,
-              ctx => grpcWebServiceHandlers(ctx.request).map(RouteResult.Complete)(actorSystem.executionContext)
+              ctx => grpcWebServiceHandlers(ctx.request).map(RouteResult.Complete)(executionContext)
             )))
         )
     ).fold(
