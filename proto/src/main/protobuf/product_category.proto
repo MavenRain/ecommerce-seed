@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package com.dastunvidal;
+
+message ProductCategory {
+  oneof product_category {
+    First first = 1;
+  }
+}
+
+message First {
+
+}

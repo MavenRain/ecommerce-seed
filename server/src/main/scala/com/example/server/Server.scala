@@ -28,7 +28,9 @@ object Server extends Directives {
   def startHttpServer()(implicit actorSystem: ActorSystem[_]): Unit =
     Runtime.default.unsafeRunAsync_(ZIO.fromFuture(_ =>
       WebHandler
-        .grpcWebHandler(ServiceHandler.partial(new ServiceImpl()))
+        .grpcWebHandler(ServiceHandler.partial(
+            actorSystem.pipe(system => new ServiceImpl { val actorSystem = system })
+        ))
         .pipe(grpcWebServiceHandlers =>
           Http()
             .newServerAt(
@@ -51,7 +53,7 @@ object Server extends Directives {
         startHttpServer()(context.system)
         Behaviors.empty
       },
-      "akka-grpc-slinky-grpcweb",
+      "ecommerce-seed",
       ConfigFactory
         .parseString("akka.http.server.preview.enable-http2 = on")
         .withFallback(ConfigFactory.defaultApplication())

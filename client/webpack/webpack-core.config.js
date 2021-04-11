@@ -21,7 +21,7 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      title: "akka-grpc-slinky-grpcweb"
+      title: "ecommerce-seed"
     })
   ],
   output: {

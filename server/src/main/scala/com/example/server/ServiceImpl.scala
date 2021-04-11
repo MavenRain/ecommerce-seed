@@ -9,7 +9,9 @@ import scala.concurrent.Future
 import scala.concurrent.duration.{DurationDouble, DurationInt}
 import scala.util.chaining.scalaUtilChainingOps
 
-class ServiceImpl(implicit actorSystem: ActorSystem[_]) extends Service {
+trait ServiceImpl extends Service {
+
+  protected implicit val actorSystem: ActorSystem[_]
 
   override def unary(in: Request): Future[Response] =
     after(2.seconds)(Future.successful(Response(s"Received [${in.payload}]")))

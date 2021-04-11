@@ -24,7 +24,7 @@ lazy val reactVersion             = "16.12.0"
 lazy val reactProxyVersion        = "1.1.8"
 lazy val zioVersion = "1.0.5"
 
-lazy val `akka-grpc-slinky-grpcweb` = (project in file("."))
+lazy val `ecommerce-seed` = (project in file("."))
   .aggregate(
     client,
     server
@@ -93,60 +93,66 @@ lazy val client =
     )
     .dependsOn(protoJs)
 
-lazy val server = project
-  .enablePlugins(AkkaGrpcPlugin, WebScalaJSBundlerPlugin, JavaAppPackaging, DockerPlugin, BuildInfoPlugin)
-  .in(file("server"))
-  .settings(
-    scalaJSProjects := {
-      autoImport.buildEnv.value match {
-        case BuildEnv.Production =>
-          Seq(client)
-        case _ =>
-          Seq.empty
-      }
-    },
-    pipelineStages in Assets := {
-      autoImport.buildEnv.value match {
-        case BuildEnv.Production =>
-          Seq(scalaJSPipeline)
-        case _ =>
-          Seq.empty
-      }
-    },
-    compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value,
-    WebKeys.packagePrefix in Assets := "public/",
-    managedClasspath in Runtime += (packageBin in Assets).value,
-    libraryDependencies ++= Seq(
-      "com.chuusai" %% "shapeless" % shapelessVersion,
-      "com.typesafe.akka" %% "akka-actor-typed"         % akkaVersion,
-      "com.typesafe.akka" %% "akka-stream"              % akkaVersion,
-      "com.typesafe.akka" %% "akka-discovery"           % akkaVersion,
-      "com.typesafe.akka" %% "akka-pki"                 % akkaVersion,
-      "com.typesafe.akka" %% "akka-http"                % akkaHttpVersion,
-      "com.typesafe.akka" %% "akka-http2-support"       % akkaHttpVersion,
-      "ch.megard"         %% "akka-http-cors"           % "0.4.2",
-      "ch.qos.logback"    % "logback-classic"           % logbackVersion,
-      "com.typesafe.akka" %% "akka-actor-testkit-typed" % akkaVersion % Test,
-      "com.typesafe.akka" %% "akka-stream-testkit"      % akkaVersion % Test,
-      "dev.zio" %% "zio" % zioVersion,
-      "org.scalatest"     %% "scalatest"                % "3.1.1" % Test
-    ),
-    Compile / mainClass := Some("com.example.server.Server"),
-    buildInfoKeys ++= Seq[BuildInfoKey]("environmentMode" -> autoImport.buildEnv.value),
-    buildInfoPackage := "com.example"
-  )
-  .settings(
-    dockerAliases in Docker += DockerAlias(None, None, "akka-grpc-slinky-grpcweb", None),
-    packageName in Docker := "akka-grpc-slinky-grpcweb",
-    dockerBaseImage := "openjdk:8-alpine",
-    dockerCommands := {
-      val (stage0, stage1)           = dockerCommands.value.splitAt(8)
-      val (stage1part1, stage1part2) = stage1.splitAt(5)
-      stage0 ++ stage1part1 ++ Seq(ExecCmd("RUN", "apk", "add", "--no-cache", "bash")) ++ stage1part2
-    },
-    dockerExposedPorts ++= Seq(9000)
-  )
-  .dependsOn(protoJVM)
+lazy val server =
+  project
+    .enablePlugins(AkkaGrpcPlugin, WebScalaJSBundlerPlugin, JavaAppPackaging, DockerPlugin, BuildInfoPlugin)
+    .in(file("server"))
+    .settings(
+      scalaJSProjects := {
+        autoImport.buildEnv.value match {
+          case BuildEnv.Production =>
+            Seq(client)
+          case _ =>
+            Seq.empty
+        }
+      },
+      pipelineStages in Assets := {
+        autoImport.buildEnv.value match {
+          case BuildEnv.Production =>
+            Seq(scalaJSPipeline)
+          case _ =>
+            Seq.empty
+        }
+      },
+      compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value,
+      WebKeys.packagePrefix in Assets := "public/",
+      managedClasspath in Runtime += (packageBin in Assets).value,
+      libraryDependencies ++= Seq(
+        "com.chuusai" %% "shapeless" % shapelessVersion,
+        "com.typesafe.akka" %% "akka-actor-typed"         % akkaVersion,
+        "com.typesafe.akka" %% "akka-stream"              % akkaVersion,
+        "com.typesafe.akka" %% "akka-discovery"           % akkaVersion,
+        "com.typesafe.akka" %% "akka-pki"                 % akkaVersion,
+        "com.typesafe.akka" %% "akka-http"                % akkaHttpVersion,
+        "com.typesafe.akka" %% "akka-http2-support"       % akkaHttpVersion,
+        "ch.megard"         %% "akka-http-cors"           % "0.4.2",
+        "ch.qos.logback"    % "logback-classic"           % logbackVersion,
+        "com.typesafe.akka" %% "akka-actor-testkit-typed" % akkaVersion % Test,
+        "com.typesafe.akka" %% "akka-stream-testkit"      % akkaVersion % Test,
+        "dev.zio" %% "zio" % zioVersion,
+        "org.scalatest"     %% "scalatest"                % "3.1.1" % Test
+      ),
+      scalacOptions ++= Seq(
+        "-Xfatal-warnings",
+        "-feature",
+        "-deprecation"
+      ),
+      Compile / mainClass := Some("com.example.server.Server"),
+      buildInfoKeys ++= Seq[BuildInfoKey]("environmentMode" -> autoImport.buildEnv.value),
+      buildInfoPackage := "com.example"
+    )
+    .settings(
+      dockerAliases in Docker += DockerAlias(None, None, "ecommerce-seed", None),
+      packageName in Docker := "ecommerce-seed",
+      dockerBaseImage := "openjdk:8-alpine",
+      dockerCommands := {
+        val (stage0, stage1)           = dockerCommands.value.splitAt(8)
+        val (stage1part1, stage1part2) = stage1.splitAt(5)
+        stage0 ++ stage1part1 ++ Seq(ExecCmd("RUN", "apk", "add", "--no-cache", "bash")) ++ stage1part2
+      },
+      dockerExposedPorts ++= Seq(9000)
+    )
+    .dependsOn(protoJVM)
 
 addCommandAlias("serverDev", "~server/reStart")
 addCommandAlias("clientDev", "client/fastOptJS::startWebpackDevServer;~client/fastOptJS")
