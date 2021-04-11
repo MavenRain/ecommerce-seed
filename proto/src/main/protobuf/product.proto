@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package com.dastunvidal;
+
+import "price.proto";
+
+message Product {
+  string identifier = 1;
+  ProductCategory category = 2;
+  Price price = 3;
+}
+
+enum ProductCategory {
+  first = 0;
+}

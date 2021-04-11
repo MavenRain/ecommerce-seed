@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package com.dastunvidal;
+
+import "real.proto";
+
+message Price {
+  Currency currency = 1;
+  Real amount = 2;
+}
+
+enum Currency {
+  Bitcoin = 0;
+  Ethereum = 1;
+  Litecoin = 2;
+  Usd = 3;
+  cad = 4;
+}

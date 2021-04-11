@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+package com.dastunvidal;
+
+message Consumer {
+  string identifier = 1;
+}

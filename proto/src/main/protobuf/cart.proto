@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package com.dastunvidal;
+
+import "consumer.proto";
+import "product.proto";
+
+message Cart {
+  string identifier = 1;
+  Consumer consumer = 2;
+  repeated Product products = 3;
+}

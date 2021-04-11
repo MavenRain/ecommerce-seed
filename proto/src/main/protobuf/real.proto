@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package com.dastunvidal;
+
+message Real {
+  int32 value = 1;
+  int32 decimal_places = 2;
+}
