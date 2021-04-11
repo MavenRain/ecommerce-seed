@@ -1,4 +1,4 @@
-# Akka gRPC Slinky gRPC-web
+# Ecommerce-seed
 
 This template project was the result of investigation into full-stack `Scala` web development experience with following requirements:
 
