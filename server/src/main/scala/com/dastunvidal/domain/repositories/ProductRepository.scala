@@ -27,7 +27,7 @@ object ProductRepository {
   private object ToContractResponse extends Poly1 {
     private val emptyResponse = ReadProductResponse(EmptyResponse) 
     implicit def error = at[Error] { _ => emptyResponse.withError(ContractError()) }
-    implicit def product = at[Product] { toContractProduct(_).pipe(contractProduct => emptyResponse.withProduct(contractProduct)) }
+    implicit def product = at[Product] { toContractProduct(_).pipe(emptyResponse.withProduct(_)) }
   }
   private object ToContractCategory extends Poly1 {
     implicit def empty = at[EmptyCategory.type] { _ => ProductCategory() }
