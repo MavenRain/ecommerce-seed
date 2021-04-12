@@ -9,7 +9,7 @@ import com.dastunvidal.ReadProductRequest.Request.{Empty, Identifier}
 import com.dastunvidal.domain.repositories.{Error => DomainError, ProductRepository}
 import com.dastunvidal.domain.repositories.ProductRepository.RichResponse
 import scala.util.chaining.scalaUtilChainingOps
-import shapeless.{:+:, CNil, Poly1}
+import shapeless.{:+:, CNil, Generic, Poly1}
 
 trait ServiceImpl extends ProductApi {
   def readProduct(in: Source[ReadProductRequest, NotUsed]): Source[ReadProductResponse, NotUsed] =

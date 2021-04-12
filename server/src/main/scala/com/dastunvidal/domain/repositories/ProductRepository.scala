@@ -6,7 +6,8 @@ import com.dastunvidal.ReadProductRequest.Request.{Empty, Identifier}
 import com.dastunvidal.ReadProductResponse
 import com.dastunvidal.ReadProductResponse.Response.{Empty => EmptyResponse}
 import scala.util.chaining.scalaUtilChainingOps
-import shapeless.{::, :+:, CNil, Coproduct, HNil, Poly1}
+import scalapb.UnknownFieldSet.empty
+import shapeless.{::, :+:, CNil, Coproduct, Generic, HNil, Poly1}
 import zio.prelude.Newtype
 
 object Error
@@ -21,28 +22,38 @@ object ProductRepository {
   type ProductIdentifier = ProductIdentifier.Type
   type SupplierIdentifier = SupplierIdentifier.Type
   type Category = EmptyCategory.type :+: First.type :+: CNil
-  type Product = ProductIdentifier :: Category :: Price.type :: SupplierIdentifier :: HNil
+  type Product = ProductIdentifier :: Category :: Price.type :: SupplierIdentifier :: Unit :: HNil
   private val aProduct =
     ContractProduct(identifier = "bar")
       .withCategory(ProductCategory().withFirst(ContractFirst()))
       .withPrice(ContractPrice())
       .withSupplier(Supplier(identifier = "acme"))
   type Response = Error :+: Product :+: CNil
-  object ToContractResponse extends Poly1 {
+  private object ToContractResponse extends Poly1 {
     private val emptyResponse = ReadProductResponse(EmptyResponse) 
     implicit def error = at[Error] { _ => emptyResponse.withError(ContractError()) }
     implicit def product = at[Product] { toContractProduct(_).pipe(contractProduct => emptyResponse.withProduct(contractProduct)) }
+  }
+  private object ToContractCategory extends Poly1 {
+    implicit def empty = at[EmptyCategory.type] { _ => ProductCategory() }
+    implicit def first = at[First.type] { _ => ProductCategory().withFirst(ContractFirst()) }
+    implicit def nil = at[CNil] { _ => ProductCategory() }
+  }
+  private object ToContractProduct extends Poly1 {
+    implicit def productIdentifier = at[ProductIdentifier] { ProductIdentifier.unwrap(_) }
+    implicit def category = at[Category] { _.fold(ToContractCategory).pipe(Option(_)) }
+    implicit def price = at[Price.type] { _ => Some(ContractPrice()) }
+    implicit def supplierIdentifier = at[SupplierIdentifier] { id => Some(Supplier(identifier = SupplierIdentifier.unwrap(id))) }
+    implicit def unit = at[Unit] { _ => empty }
+    implicit def nil = at[HNil] { identity }
   }
   implicit class RichResponse(response: Response) {
     val toContractResponse = response.fold(ToContractResponse)
   }
   private def toContractProduct(product: Product): ContractProduct =
-    ContractProduct(identifier = ProductIdentifier.unwrap(product.select[ProductIdentifier]))
-      .withCategory(ProductCategory().withFirst(ContractFirst()))
-      .withPrice(ContractPrice())
-      .withSupplier(Supplier(identifier = SupplierIdentifier.unwrap(product.select[SupplierIdentifier])))
+    product.map(ToContractProduct).pipe(Generic[ContractProduct].from(_))
   def apply(request: Request): Response = request match {
     case Empty => Coproduct[Response](Error)
-    case Identifier(_) => Coproduct[Response](ProductIdentifier("Bob") :: Coproduct[Category](First) :: Price :: SupplierIdentifier("Burgers") :: HNil)
+    case Identifier(_) => Coproduct[Response](ProductIdentifier("Bob") :: Coproduct[Category](First) :: Price :: SupplierIdentifier("Burgers") :: () :: HNil)
   }
 }
