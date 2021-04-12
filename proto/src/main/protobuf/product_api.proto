@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package com.dastunvidal;
+
+import "product.proto";
+
+message ReadProductRequest {
+  oneof read_product_request {
+    string identifier = 1;
+  }
+}
+
+message ReadProductsRequest {
+  repeated ReadProductRequest requests = 1;
+}
+
+message ReadProductsResponse {
+  repeated Product products = 1;
+}
+
+service ProductApi {
+  rpc ReadProducts(ReadProductsRequest) returns (ReadProductsResponse) {}
+}

@@ -25,7 +25,7 @@ object Server extends Directives {
     else
       WebHandler.defaultCorsSettings
 
-  private def startHttpServer()(implicit actorSystem: ActorSystem[_]): Unit =
+  private def startHttpServer(port: Int)(implicit actorSystem: ActorSystem[_]): Unit =
     Runtime.default.unsafeRunAsync_(ZIO.fromFuture(executionContext =>
       WebHandler
         .grpcWebHandler(ServiceHandler.partial(
@@ -35,7 +35,7 @@ object Server extends Directives {
           Http()
             .newServerAt(
               interface = "0.0.0.0",
-              port = 9000
+              port = port
             )
             .bind(Route.toFunction(concat(
               new WebService().route,
@@ -50,7 +50,7 @@ object Server extends Directives {
   def main(args: Array[String]): Unit =
     ActorSystem[Nothing](
       Behaviors.setup[Nothing] { context =>
-        startHttpServer()(context.system)
+        startHttpServer(9000)(context.system)
         Behaviors.empty
       },
       "ecommerce-seed",
