@@ -5,19 +5,22 @@ package com.dastunvidal;
 import "product.proto";
 
 message ReadProductRequest {
-  oneof read_product_request {
+  oneof request {
     string identifier = 1;
   }
 }
 
-message ReadProductsRequest {
-  repeated ReadProductRequest requests = 1;
+message ReadProductResponse {
+  oneof response {
+    Product product = 1;
+    Error error = 2;
+  }
 }
 
-message ReadProductsResponse {
-  repeated Product products = 1;
+message Error {
+
 }
 
 service ProductApi {
-  rpc ReadProducts(ReadProductsRequest) returns (ReadProductsResponse) {}
+  rpc ReadProduct(stream ReadProductRequest) returns (stream ReadProductResponse) {}
 }

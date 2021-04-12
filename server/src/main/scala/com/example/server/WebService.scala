@@ -7,7 +7,7 @@ import akka.http.scaladsl.server.Route
 import com.example.BuildInfo
 import com.example.server.WebService.AssetsPath
 
-class WebService() extends Directives {
+trait WebService extends Directives {
 
   val route: Route = concat(
     pathSingleSlash {
@@ -34,6 +34,7 @@ class WebService() extends Directives {
 }
 
 object WebService {
+  def apply(): WebService = new WebService {}
   val AssetsPath: String =
     if (BuildInfo.environmentMode.equalsIgnoreCase("production"))
       "public/dist"

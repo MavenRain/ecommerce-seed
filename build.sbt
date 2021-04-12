@@ -23,6 +23,7 @@ lazy val slinkyVersion            = "0.6.7"
 lazy val reactVersion             = "16.12.0"
 lazy val reactProxyVersion        = "1.1.8"
 lazy val zioVersion = "1.0.5"
+lazy val zioPreludeVersion = "1.0.0-RC3"
 
 lazy val `ecommerce-seed` = (project in file("."))
   .aggregate(
@@ -63,6 +64,7 @@ lazy val client =
       libraryDependencies += "me.shadaj" %%% "slinky-web" % slinkyVersion,
       libraryDependencies += "me.shadaj" %%% "slinky-hot" % slinkyVersion,
       libraryDependencies += "com.chuusai" %%% "shapeless" % shapelessVersion,
+      libraryDependencies += "dev.zio" %%% "zio-prelude" % zioPreludeVersion,
       scalacOptions += "-Ymacro-annotations",
       scalacOptions += "-Xfatal-warnings",
       scalacOptions += "-feature",
@@ -130,6 +132,7 @@ lazy val server =
         "com.typesafe.akka" %% "akka-actor-testkit-typed" % akkaVersion % Test,
         "com.typesafe.akka" %% "akka-stream-testkit"      % akkaVersion % Test,
         "dev.zio" %% "zio" % zioVersion,
+        "dev.zio" %% "zio-prelude" % zioPreludeVersion,
         "org.scalatest"     %% "scalatest"                % "3.1.1" % Test
       ),
       scalacOptions ++= Seq(

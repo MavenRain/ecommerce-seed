@@ -14,5 +14,5 @@ enum Currency {
   Ethereum = 1;
   Litecoin = 2;
   Usd = 3;
-  cad = 4;
+  Cad = 4;
 }

@@ -7,13 +7,17 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import akka.http.scaladsl.server.{Directives, Route, RouteResult}
 import ch.megard.akka.http.cors.scaladsl.settings.CorsSettings
+import com.dastunvidal.ProductApiHandler
+import com.dastunvidal.server.{ServiceImpl => EcomServer}
 import com.example.{BuildInfo, ServiceHandler}
 import com.typesafe.config.ConfigFactory
 import org.slf4j.LoggerFactory.getLogger
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 import scala.util.chaining.scalaUtilChainingOps
+import shapeless.{::, HNil}
 import zio.{Runtime, ZIO}
+import zio.prelude.Newtype
 
 object Server extends Directives {
 
@@ -24,33 +28,61 @@ object Server extends Directives {
       CorsSettings.defaultSettings
     else
       WebHandler.defaultCorsSettings
+  
+  private object ServicePort extends Newtype[Int]
+  private type ServicePort = ServicePort.Type
+  private object ProductApiPort extends Newtype[Int]
+  private type ProductApiPort = ProductApiPort.Type
 
-  private def startHttpServer(port: Int)(implicit actorSystem: ActorSystem[_]): Unit =
-    Runtime.default.unsafeRunAsync_(ZIO.fromFuture(executionContext =>
-      WebHandler
-        .grpcWebHandler(ServiceHandler.partial(
-            actorSystem.pipe(system => new ServiceImpl { val actorSystem = system })
-        ))
-        .pipe(grpcWebServiceHandlers =>
-          Http()
-            .newServerAt(
-              interface = "0.0.0.0",
-              port = port
+  private def startHttpServer(ports: ServicePort :: ProductApiPort :: HNil)(implicit actorSystem: ActorSystem[_]): Unit =
+    Runtime.default.unsafeRunAsync_(
+      ZIO.collectAllPar(Seq(
+        ZIO.fromFuture(executionContext =>
+          WebHandler
+            .grpcWebHandler(ServiceHandler.partial(
+                actorSystem.pipe(system => new ServiceImpl { val actorSystem = system })
+            ))
+            .pipe(grpcWebServiceHandlers =>
+              Http()
+                .newServerAt(
+                  interface = "0.0.0.0",
+                  port = ServicePort.unwrap(ports.select[ServicePort])
+                )
+                .bind(Route.toFunction(concat(
+                  WebService().route,
+                  ctx => grpcWebServiceHandlers(ctx.request).map(RouteResult.Complete)(executionContext)
+                )))
             )
-            .bind(Route.toFunction(concat(
-              new WebService().route,
-              ctx => grpcWebServiceHandlers(ctx.request).map(RouteResult.Complete)(executionContext)
-            )))
+        ).fold(
+          ex => logger.error(s"gRPC server binding failed", ex).tap(_ => actorSystem.terminate()),
+          binding => logger.info(s"gRPC server bound to: ${binding.localAddress}")
+        ),
+        ZIO.fromFuture(executionContext =>
+          WebHandler.grpcWebHandler(ProductApiHandler.partial(
+            EcomServer()
+          ))
+          .pipe(grpcWebServiceHandlers =>
+            Http()
+              .newServerAt(
+                interface = "0.0.0.0",
+                port = ProductApiPort.unwrap(ports.select[ProductApiPort])
+              )
+              .bind(Route.toFunction(concat(
+                WebService().route,
+                ctx => grpcWebServiceHandlers(ctx.request).map(RouteResult.Complete)(executionContext)
+              )))
+          )
+        ).fold(
+          ex => logger.error(s"gRPC server binding failed", ex).tap(_ => actorSystem.terminate()),
+          binding => logger.info(s"gRPC server bound to: ${binding.localAddress}")
         )
-    ).fold(
-      ex => logger.error(s"gRPC server binding failed", ex).tap(_ => actorSystem.terminate()),
-      binding => logger.info(s"gRPC server bound to: ${binding.localAddress}")
-    ))
+      ))
+    )
 
   def main(args: Array[String]): Unit =
     ActorSystem[Nothing](
       Behaviors.setup[Nothing] { context =>
-        startHttpServer(9000)(context.system)
+        startHttpServer(ServicePort(9000) :: ProductApiPort(12000) :: HNil)(context.system)
         Behaviors.empty
       },
       "ecommerce-seed",
