@@ -1,13 +1,11 @@
 package com.example.server
 
 import akka.NotUsed
-import akka.actor.typed.ActorSystem
 import akka.pattern.after
 import akka.stream.scaladsl.{Sink, Source}
 import com.example.{Request, Response, Service}
 import scala.concurrent.Future
 import scala.concurrent.duration.{DurationDouble, DurationInt}
-import scala.util.chaining.scalaUtilChainingOps
 
 trait ServiceImpl extends Service with AkkaSystem {
 

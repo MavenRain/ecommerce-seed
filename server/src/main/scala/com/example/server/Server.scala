@@ -4,7 +4,6 @@ import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.grpc.scaladsl.WebHandler
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import akka.http.scaladsl.server.{Directives, Route, RouteResult}
 import ch.megard.akka.http.cors.scaladsl.settings.CorsSettings
 import com.dastunvidal.ProductApiHandler
@@ -12,8 +11,6 @@ import com.dastunvidal.server.{ServiceImpl => EcomServer}
 import com.example.{BuildInfo, ServiceHandler}
 import com.typesafe.config.ConfigFactory
 import org.slf4j.LoggerFactory.getLogger
-import scala.concurrent.Future
-import scala.util.{Failure, Success}
 import scala.util.chaining.scalaUtilChainingOps
 import shapeless.{::, HNil}
 import zio.{Runtime, ZIO}

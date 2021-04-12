@@ -1,9 +1,7 @@
 package com.example.client
 
 import com.example.service.ServiceGrpcWeb
-import io.grpc.ManagedChannel
 import scala.scalajs.LinkingInfo
-import scala.util.chaining.scalaUtilChainingOps
 import scalapb.grpc.Channels
 import scalapb.grpcweb.Metadata
 import slinky.core.{StatelessComponent, Tag}

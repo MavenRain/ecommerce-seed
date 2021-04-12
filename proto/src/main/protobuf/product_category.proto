@@ -3,7 +3,7 @@ syntax = "proto3";
 package com.dastunvidal;
 
 message ProductCategory {
-  oneof product_category {
+  oneof sealed_trait {
     First first = 1;
   }
 }

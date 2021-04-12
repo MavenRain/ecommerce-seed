@@ -3,7 +3,7 @@ package com.example.client
 import org.scalajs.dom.ext.AjaxException
 import org.scalajs.dom.ext.Ajax.get
 import scala.util.chaining.scalaUtilChainingOps
-import slinky.core.{FunctionalComponent, StatelessComponent}
+import slinky.core.FunctionalComponent
 import slinky.core.annotations.react
 import slinky.core.facade.Hooks.{useEffect, useState}
 import slinky.core.facade.Fragment

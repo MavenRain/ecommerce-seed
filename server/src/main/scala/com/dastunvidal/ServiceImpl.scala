@@ -3,13 +3,10 @@ package com.dastunvidal.server
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import com.dastunvidal.{
-  Error, ProductApi, ReadProductRequest, ReadProductResponse
+  ProductApi, ReadProductRequest, ReadProductResponse
 }
-import com.dastunvidal.ReadProductRequest.Request.{Empty, Identifier}
-import com.dastunvidal.domain.repositories.{Error => DomainError, ProductRepository}
+import com.dastunvidal.domain.repositories.ProductRepository
 import com.dastunvidal.domain.repositories.ProductRepository.RichResponse
-import scala.util.chaining.scalaUtilChainingOps
-import shapeless.{:+:, CNil, Generic, Poly1}
 
 trait ServiceImpl extends ProductApi {
   def readProduct(in: Source[ReadProductRequest, NotUsed]): Source[ReadProductResponse, NotUsed] =

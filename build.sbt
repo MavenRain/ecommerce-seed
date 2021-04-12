@@ -69,6 +69,7 @@ lazy val client =
       scalacOptions += "-Xfatal-warnings",
       scalacOptions += "-feature",
       scalacOptions += "-deprecation",
+      scalacOptions += "-Wunused:imports,privates,locals,implicits",
       npmDependencies in Compile += "react"                  -> reactVersion,
       npmDependencies in Compile += "react-dom"              -> reactVersion,
       npmDependencies in Compile += "react-proxy"            -> reactProxyVersion,
@@ -138,7 +139,8 @@ lazy val server =
       scalacOptions ++= Seq(
         "-Xfatal-warnings",
         "-feature",
-        "-deprecation"
+        "-deprecation",
+        "-Wunused:imports,privates,locals,implicits"
       ),
       Compile / mainClass := Some("com.example.server.Server"),
       buildInfoKeys ++= Seq[BuildInfoKey]("environmentMode" -> autoImport.buildEnv.value),
