@@ -23,11 +23,6 @@ object ProductRepository {
   type SupplierIdentifier = SupplierIdentifier.Type
   type Category = EmptyCategory.type :+: First.type :+: CNil
   type Product = ProductIdentifier :: Category :: Price.type :: SupplierIdentifier :: Unit :: HNil
-  private val aProduct =
-    ContractProduct(identifier = "bar")
-      .withCategory(ProductCategory().withFirst(ContractFirst()))
-      .withPrice(ContractPrice())
-      .withSupplier(Supplier(identifier = "acme"))
   type Response = Error :+: Product :+: CNil
   private object ToContractResponse extends Poly1 {
     private val emptyResponse = ReadProductResponse(EmptyResponse) 
