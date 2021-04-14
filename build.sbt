@@ -12,7 +12,7 @@ resolvers in ThisBuild ++= Seq(
 
 lazy val akkaVersion              = "2.6.10"
 lazy val akkaHttpVersion          = "10.2.0"
-lazy val akkaGrpcVersion          = "1.0.2"
+lazy val akkaGrpcVersion          = "1.1.1"
 lazy val logbackVersion           = "1.2.3"
 lazy val scalaTestPlusPlayVersion = "5.0.0"
 lazy val scalaJavaTime = "2.0.0"
