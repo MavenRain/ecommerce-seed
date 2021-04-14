@@ -4,6 +4,7 @@ import com.example.service.ServiceGrpcWeb
 import scala.scalajs.LinkingInfo
 import scalapb.grpc.Channels
 import scalapb.grpcweb.Metadata
+import shapeless.HNil
 import slinky.core.{StatelessComponent, Tag}
 import slinky.core.annotations.react
 import slinky.core.facade.{Fragment, ReactElement}
@@ -19,7 +20,11 @@ class App extends StatelessComponent {
       Unary(),
       Stream(cancel = false),
       Stream(cancel = true),
-      Foo()
+      CollectionView(Seq(
+        LineItem(LineItem.Title("Line Item") :: LineItem.Text("first") :: HNil),
+        LineItem(LineItem.Title("Line Item") :: LineItem.Text("second") :: HNil),
+        LineItem(LineItem.Title("Line Item") :: LineItem.Text("third") :: HNil)
+      ))
     )
 }
 

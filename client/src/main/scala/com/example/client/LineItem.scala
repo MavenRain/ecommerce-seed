@@ -4,11 +4,17 @@ import scala.scalajs.js.Dynamic.literal
 import slinky.core.FunctionalComponent
 import slinky.core.annotations.react
 import slinky.web.html.{b, div, style}
+import shapeless.{::, HNil}
+import zio.prelude.Newtype
 
 @react
 object LineItem {
-  type Props = String
-  val component = FunctionalComponent[Props] { props =>
+  object Title extends Newtype[String]
+  type Title = Title.Type
+  object Text extends Newtype[String]
+  type Text = Text.Type
+  type Props = Title :: Text :: HNil
+  val component = FunctionalComponent[Props] { case title :: text :: _ =>
     div(style := literal(
       width = "35%",
       boxSizing = "border-box",
@@ -19,13 +25,13 @@ object LineItem {
         padding = "10px",
         boxSizing = "border-box"
       ))(
-        b(style := literal(color = "rgb(109, 109, 109)"))("RESULT")
+        b(style := literal(color = "rgb(109, 109, 109)"))(Title.unwrap(title))
       ),
       div(style := literal(
         overflow = "auto",
         padding = "10px",
         boxSizing = "border-box"
-      ))(props)
+      ))(Text.unwrap(text))
     ) 
   }
 }
