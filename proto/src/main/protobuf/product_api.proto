@@ -5,9 +5,7 @@ package com.dastunvidal;
 import "product.proto";
 
 message ReadProductRequest {
-  oneof request {
-    string identifier = 1;
-  }
+  repeated string identifiers = 1;
 }
 
 message ReadProductResponse {
@@ -22,5 +20,5 @@ message Error {
 }
 
 service ProductApi {
-  rpc ReadProduct(stream ReadProductRequest) returns (stream ReadProductResponse) {}
+  rpc ReadProduct(ReadProductRequest) returns (stream ReadProductResponse) {}
 }

@@ -1,7 +1,9 @@
 package com.dastunvidal.domain.repositories
 
-import com.dastunvidal.{Error => ContractError, First => ContractFirst, Price => ContractPrice, Product => ContractProduct, ProductCategory, Supplier}
-import com.dastunvidal.ReadProductRequest.Request.{Empty, Identifier}
+import com.dastunvidal.{
+  Error => ContractError, First => ContractFirst, Price => ContractPrice,
+  Product => ContractProduct, ProductCategory, Supplier
+}
 import com.dastunvidal.ReadProductResponse
 import com.dastunvidal.ReadProductResponse.Response.{Empty => EmptyResponse}
 import scala.util.chaining.scalaUtilChainingOps
@@ -46,10 +48,13 @@ object ProductRepository {
   }
   private def toContractProduct(product: Product): ContractProduct =
     product.map(ToContractProduct).pipe(Generic[ContractProduct].from(_))
-  object Retrieve extends Poly1 {
-    implicit def empty = at[Empty.type] { _ => Coproduct[Response](Error) }
-    implicit def identifier = at[Identifier] { _ =>
-      Coproduct[Response](ProductIdentifier("Bob") :: Coproduct[Category](First) :: Price :: SupplierIdentifier("Burgers") :: () :: HNil)
-    }
+  implicit class RichString(identifier: String) {
+    val toDomain = Coproduct[Response](ProductIdentifier("Bob") :: Coproduct[Category](First) :: Price :: SupplierIdentifier("Burgers") :: () :: HNil)
   }
+  //object Retrieve extends Poly1 {
+  //  implicit def empty = at[Empty.type] { _ => Coproduct[Response](Error) }
+  //  implicit def identifier = at[Identifier] { _ =>
+  //    Coproduct[Response](ProductIdentifier("Bob") :: Coproduct[Category](First) :: Price :: SupplierIdentifier("Burgers") :: () :: HNil)
+  //  }
+  //}
 }

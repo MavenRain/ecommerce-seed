@@ -5,17 +5,17 @@ import akka.stream.scaladsl.Source
 import com.dastunvidal.{
   ProductApi, ReadProductRequest, ReadProductResponse
 }
-import com.dastunvidal.ReadProductRequest.Request
-import com.dastunvidal.domain.repositories.ProductRepository.Retrieve
-import com.dastunvidal.domain.repositories.ProductRepository.RichResponse
-import shapeless.Generic
+import com.dastunvidal.domain.repositories.ProductRepository.{
+  RichResponse, RichString
+}
+import scala.util.chaining.scalaUtilChainingOps
 
 trait ServiceImpl extends ProductApi {
-  def readProduct(in: Source[ReadProductRequest, NotUsed]): Source[ReadProductResponse, NotUsed] =
-    in
-      .map(_.request)
-      .map(Generic[Request].to(_))
-      .map(_.fold(Retrieve))
+  def readProduct(request: ReadProductRequest): Source[ReadProductResponse, NotUsed] =
+    request
+      .identifiers
+      .pipe(Source(_))
+      .map(_.toDomain)
       .map(_.toContractResponse)
 }
 
