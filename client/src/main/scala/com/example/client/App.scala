@@ -20,11 +20,13 @@ class App extends StatelessComponent {
       Unary(),
       Stream(cancel = false),
       Stream(cancel = true),
+      Scratchpad(),
       CollectionView(Seq(
         LineItem(LineItem.Title("Line Item") :: LineItem.Text("first") :: HNil),
         LineItem(LineItem.Title("Line Item") :: LineItem.Text("second") :: HNil),
         LineItem(LineItem.Title("Line Item") :: LineItem.Text("third") :: HNil)
-      ))
+      )),
+      Button()
     )
 }
 

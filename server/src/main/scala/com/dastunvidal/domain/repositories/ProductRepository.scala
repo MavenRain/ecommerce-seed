@@ -51,10 +51,4 @@ object ProductRepository {
   implicit class RichString(identifier: String) {
     val toDomain = Coproduct[Response](ProductIdentifier("Bob") :: Coproduct[Category](First) :: Price :: SupplierIdentifier("Burgers") :: () :: HNil)
   }
-  //object Retrieve extends Poly1 {
-  //  implicit def empty = at[Empty.type] { _ => Coproduct[Response](Error) }
-  //  implicit def identifier = at[Identifier] { _ =>
-  //    Coproduct[Response](ProductIdentifier("Bob") :: Coproduct[Category](First) :: Price :: SupplierIdentifier("Burgers") :: () :: HNil)
-  //  }
-  //}
 }
