@@ -14,7 +14,7 @@ object LineItem {
   object Text extends Newtype[String]
   type Text = Text.Type
   type Props = Title :: Text :: HNil
-  val component = FunctionalComponent[Props] { case title :: text :: _ =>
+  val component = FunctionalComponent[Props] { case props =>
     div(style := literal(
       width = "35%",
       boxSizing = "border-box",
@@ -25,13 +25,13 @@ object LineItem {
         padding = "10px",
         boxSizing = "border-box"
       ))(
-        b(style := literal(color = "rgb(109, 109, 109)"))(Title.unwrap(title))
+        b(style := literal(color = "rgb(109, 109, 109)"))(Title.unwrap(props.select[Title]))
       ),
       div(style := literal(
         overflow = "auto",
         padding = "10px",
         boxSizing = "border-box"
-      ))(Text.unwrap(text))
+      ))(Text.unwrap(props.select[Text]))
     ) 
   }
 }

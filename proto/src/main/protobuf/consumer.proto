@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package com.dastunvidal;
+package io.github.mavenrain;
 
 message Consumer {
   string identifier = 1;

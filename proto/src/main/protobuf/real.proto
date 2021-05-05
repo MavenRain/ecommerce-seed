@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package com.dastunvidal;
+package io.github.mavenrain;
 
 message Real {
   int32 value = 1;

@@ -1,14 +1,15 @@
-package com.dastunvidal.domain.repositories
+package io.github.mavenrain.domain.repositories
 
-import com.dastunvidal.{
+import io.github.mavenrain.{
   Error => ContractError, First => ContractFirst, Price => ContractPrice,
   Product => ContractProduct, ProductCategory, Supplier
 }
-import com.dastunvidal.ReadProductResponse
-import com.dastunvidal.ReadProductResponse.Response.{Empty => EmptyResponse}
+import io.github.mavenrain.ReadProductResponse
+import io.github.mavenrain.ReadProductResponse.Response.{Empty => EmptyResponse}
 import scala.util.chaining.scalaUtilChainingOps
 import scalapb.UnknownFieldSet.empty
 import shapeless.{::, :+:, CNil, Coproduct, Generic, HNil, Poly1}
+import shapeless.syntax.inject.InjectSyntax
 import zio.prelude.Newtype
 
 object Error
@@ -33,7 +34,6 @@ object ProductRepository {
   private object ToContractCategory extends Poly1 {
     implicit def empty = at[EmptyCategory.type] { _ => ProductCategory() }
     implicit def first = at[First.type] { _ => ProductCategory().withFirst(ContractFirst()) }
-    implicit def nil = at[CNil] { _ => ProductCategory() }
   }
   private object ToContractProduct extends Poly1 {
     implicit def productIdentifier = at[ProductIdentifier] { ProductIdentifier.unwrap(_) }
@@ -41,7 +41,6 @@ object ProductRepository {
     implicit def price = at[Price.type] { _ => Some(ContractPrice()) }
     implicit def supplierIdentifier = at[SupplierIdentifier] { id => Some(Supplier(identifier = SupplierIdentifier.unwrap(id))) }
     implicit def unit = at[Unit] { _ => empty }
-    implicit def nil = at[HNil] { identity }
   }
   implicit class RichResponse(response: Response) {
     val toContractResponse = response.fold(ToContractResponse)
@@ -49,6 +48,6 @@ object ProductRepository {
   private def toContractProduct(product: Product): ContractProduct =
     product.map(ToContractProduct).pipe(Generic[ContractProduct].from(_))
   implicit class RichString(identifier: String) {
-    val toDomain = Coproduct[Response](ProductIdentifier("Bob") :: Coproduct[Category](First) :: Price :: SupplierIdentifier("Burgers") :: () :: HNil)
+    val toDomain = (ProductIdentifier("Bob") :: Coproduct[Category](First) :: Price :: SupplierIdentifier("Burgers") :: () :: HNil).inject[Response]
   }
 }

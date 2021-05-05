@@ -13,13 +13,17 @@ resolvers in ThisBuild ++= Seq(
 lazy val akkaVersion              = "2.6.10"
 lazy val akkaHttpVersion          = "10.2.0"
 lazy val akkaGrpcVersion          = "1.1.1"
+lazy val h2Version = "1.4.200"
+lazy val hikariVersion = "3.4.5"
 lazy val logbackVersion           = "1.2.3"
 lazy val scalaTestPlusPlayVersion = "5.0.0"
 lazy val scalaJavaTime = "2.0.0"
 lazy val scalaJsDomVersion        = "1.1.0"
 lazy val scalaJsScriptsVersion    = "1.1.4"
+lazy val scalaTestVersion = "3.2.8"
 lazy val shapelessVersion = "2.3.4"
 lazy val slinkyVersion            = "0.6.7"
+lazy val squerylVersion = "0.9.16"
 lazy val reactVersion             = "16.12.0"
 lazy val reactProxyVersion        = "1.1.8"
 lazy val zioVersion = "1.0.5"
@@ -122,19 +126,22 @@ lazy val server =
       managedClasspath in Runtime += (packageBin in Assets).value,
       libraryDependencies ++= Seq(
         "com.chuusai" %% "shapeless" % shapelessVersion,
+        "com.h2database" % "h2" % h2Version,
         "com.typesafe.akka" %% "akka-actor-typed"         % akkaVersion,
         "com.typesafe.akka" %% "akka-stream"              % akkaVersion,
         "com.typesafe.akka" %% "akka-discovery"           % akkaVersion,
         "com.typesafe.akka" %% "akka-pki"                 % akkaVersion,
         "com.typesafe.akka" %% "akka-http"                % akkaHttpVersion,
         "com.typesafe.akka" %% "akka-http2-support"       % akkaHttpVersion,
+        "com.zaxxer" % "HikariCP" % hikariVersion,
         "ch.megard"         %% "akka-http-cors"           % "0.4.2",
         "ch.qos.logback"    % "logback-classic"           % logbackVersion,
         "com.typesafe.akka" %% "akka-actor-testkit-typed" % akkaVersion % Test,
         "com.typesafe.akka" %% "akka-stream-testkit"      % akkaVersion % Test,
         "dev.zio" %% "zio" % zioVersion,
         "dev.zio" %% "zio-prelude" % zioPreludeVersion,
-        "org.scalatest"     %% "scalatest"                % "3.1.1" % Test
+        "org.scalatest"     %% "scalatest"                % scalaTestVersion % Test,
+        "org.squeryl" %% "squeryl" % squerylVersion
       ),
       scalacOptions ++= Seq(
         "-Xfatal-warnings",

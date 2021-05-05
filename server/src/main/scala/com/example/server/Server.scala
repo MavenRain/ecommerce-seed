@@ -6,8 +6,9 @@ import akka.grpc.scaladsl.WebHandler
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.{Directives, Route, RouteResult}
 import ch.megard.akka.http.cors.scaladsl.settings.CorsSettings
-import com.dastunvidal.ProductApiHandler
-import com.dastunvidal.server.{ServiceImpl => EcomServer}
+import io.github.mavenrain.ProductApiHandler
+import io.github.mavenrain.persistence.Transactions.{initializeSession, kickTheTires}
+import io.github.mavenrain.server.{ServiceImpl => EcomServer}
 import com.example.{BuildInfo, ServiceHandler}
 import com.typesafe.config.ConfigFactory
 import org.slf4j.LoggerFactory.getLogger
@@ -87,4 +88,6 @@ object Server extends Directives {
         .parseString("akka.http.server.preview.enable-http2 = on")
         .withFallback(ConfigFactory.defaultApplication())
     )
+    .tap(_ => initializeSession)
+    .tap(_ => kickTheTires)
 }
