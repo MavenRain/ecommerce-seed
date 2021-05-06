@@ -10,7 +10,7 @@ import scala.util.chaining.scalaUtilChainingOps
 object Transactions {
   type SessionFactory = Option[() => LazySession]
   val query = from(productsTable) {
-    product => where(product.category gt 0) select(product) orderBy(product.category.desc)
+    product => where(product.id gt 0) select(product) orderBy(product.price.desc)
   }
   def products = query.toSeq
   val insert: Product => Product =
@@ -38,7 +38,7 @@ object Transactions {
     transaction(
       DatabaseSchema
         .create
-        .pipe(_ => insert(Product("nu943infig", 0)))
+        .pipe(_ => insert(Product(id = 1, content = "fnu43", price = BigDecimal("123.25"))))
     )
     
 }
