@@ -19,8 +19,8 @@ trait RepositoryLaws  {
       Runtime.default.unsafeRun(
         createRepository(Seq(item))
           .select[Reader]
-          .pipe(_(hash))
-          .flatMap(_.select[Item].pipe(IO.fromOption(_)))
+          .pipe(_(Seq(hash)))
+          .flatMap(_.headOption.flatMap(_.select[Item]).pipe(IO.fromOption(_)))
           .map(_ shouldBe item)
       )
     }
@@ -33,8 +33,8 @@ trait RepositoryLaws  {
           .pipe(repository =>
             repository
               .select[Creator]
-              .pipe(_(item))
-              .flatMap(_ => repository.select[Reader].pipe(_(hash)))
+              .pipe(_(Seq(item)))
+              .flatMap(_ => repository.select[Reader].pipe(_(Seq(hash))))
               .map(_ shouldBe item)
           )
       )

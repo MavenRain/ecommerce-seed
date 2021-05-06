@@ -10,10 +10,10 @@ trait RepositoryProvider {
   type DeleterError
   type Item
   type Hash
-  type Creator = Item => UIO[Hash :+: CreatorError :+: CNil]
-  type Reader = Hash => UIO[Item :+: ReaderError :+: CNil]
-  type Updater = (Hash :: Item :: HNil) => UIO[Hash :+: UpdaterError :+: CNil]
-  type Deleter = Hash => UIO[Hash :+: DeleterError :+: CNil]
+  type Creator = Seq[Item] => UIO[Seq[Hash :+: CreatorError :+: CNil]]
+  type Reader = Seq[Hash] => UIO[Seq[Item :+: ReaderError :+: CNil]]
+  type Updater = Seq[Hash :: Item :: HNil] => UIO[Seq[Hash :+: UpdaterError :+: CNil]]
+  type Deleter = Seq[Hash] => UIO[Seq[Hash :+: DeleterError :+: CNil]]
   type Repository =
     Creator :: Reader :: Updater :: Deleter :: HNil 
 }
