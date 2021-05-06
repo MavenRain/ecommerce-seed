@@ -21,12 +21,15 @@ lazy val scalaJavaTime = "2.0.0"
 lazy val scalaJsDomVersion        = "1.1.0"
 lazy val scalaJsScriptsVersion    = "1.1.4"
 lazy val scalaTestVersion = "3.2.8"
+lazy val scalaTestPlusJunitVersion = "1.0.0-M2"
+lazy val scalaTestPlusScalacheckVersion = "3.1.0.0-RC2"
 lazy val shapelessVersion = "2.3.4"
 lazy val slinkyVersion            = "0.6.7"
 lazy val squerylVersion = "0.9.16"
 lazy val reactVersion             = "16.12.0"
 lazy val reactProxyVersion        = "1.1.8"
 lazy val zioVersion = "1.0.5"
+lazy val zioMagicVersion = "0.3.0"
 lazy val zioPreludeVersion = "1.0.0-RC3"
 
 lazy val `ecommerce-seed` = (project in file("."))
@@ -140,7 +143,10 @@ lazy val server =
         "com.typesafe.akka" %% "akka-stream-testkit"      % akkaVersion % Test,
         "dev.zio" %% "zio" % zioVersion,
         "dev.zio" %% "zio-prelude" % zioPreludeVersion,
+        "io.github.kitlangton" %% "zio-magic" % zioMagicVersion,
         "org.scalatest"     %% "scalatest"                % scalaTestVersion % Test,
+        "org.scalatestplus" %% "scalatestplus-junit" % scalaTestPlusJunitVersion % Test,
+        "org.scalatestplus" %% "scalatestplus-scalacheck" % scalaTestPlusScalacheckVersion % Test,
         "org.squeryl" %% "squeryl" % squerylVersion
       ),
       scalacOptions ++= Seq(
