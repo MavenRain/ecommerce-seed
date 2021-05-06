@@ -9,20 +9,35 @@ import zio.{IO, Runtime}
 
 trait RepositoryLaws  {
   this: AnyFlatSpec with Matchers with RepositoryProvider with ScalaCheckDrivenPropertyChecks =>
-  type Item
-  type Id
-  type RepositoryCreator = Seq[Item] => Repository[Id, Item]
+  type RepositoryCreator = Seq[Item] => Repository
   val createRepository: RepositoryCreator
   protected implicit val arbitraryItem: Arbitrary[Item]
-  protected implicit val arbitraryId: Arbitrary[Id]
+  protected implicit val arbitraryId: Arbitrary[Hash]
   
-  forAll { (item: Item, id: Id) =>
-    Runtime.default.unsafeRun(
-      createRepository(Seq(item))
-        .select[Reader[Id, Item]]
-        .pipe(_(id))
-        .flatMap(_.select[Item].pipe(IO.fromOption(_)))
-        .map(_ shouldBe item)
-    )
+  it should "read an existing item" in {
+    forAll { (item: Item, hash: Hash) =>
+      Runtime.default.unsafeRun(
+        createRepository(Seq(item))
+          .select[Reader]
+          .pipe(_(hash))
+          .flatMap(_.select[Item].pipe(IO.fromOption(_)))
+          .map(_ shouldBe item)
+      )
+    }
+  }
+
+  it should "create a new item" in {
+    forAll { (item: Item, hash: Hash) =>
+      Runtime.default.unsafeRun(
+        createRepository(Nil)
+          .pipe(repository =>
+            repository
+              .select[Creator]
+              .pipe(_(item))
+              .flatMap(_ => repository.select[Reader].pipe(_(hash)))
+              .map(_ shouldBe item)
+          )
+      )
+    }
   }
 }

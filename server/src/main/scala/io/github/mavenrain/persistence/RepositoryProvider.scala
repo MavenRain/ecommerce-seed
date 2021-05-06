@@ -4,11 +4,16 @@ import shapeless.{::, :+:, CNil, HNil}
 import zio.UIO
 
 trait RepositoryProvider {
-  type Error
-  type Creator[Item] = Item => UIO[Unit :+: Error :+: CNil]
-  type Reader[Id, Item] = Id => UIO[Item :+: Error :+: CNil]
-  type Updater[Id, Item] = (Id :: Item :: HNil) => UIO[Unit :+: Error :+: CNil]
-  type Deleter[Id] = Id => UIO[Unit :+: Error :+: CNil]
-  type Repository[Id, Item] =
-    Creator[Item] :: Reader[Id, Item] :: Updater[Id, Item] :: Deleter[Id] :: HNil 
+  type CreatorError
+  type ReaderError
+  type UpdaterError
+  type DeleterError
+  type Item
+  type Hash
+  type Creator = Item => UIO[Hash :+: CreatorError :+: CNil]
+  type Reader = Hash => UIO[Item :+: ReaderError :+: CNil]
+  type Updater = (Hash :: Item :: HNil) => UIO[Hash :+: UpdaterError :+: CNil]
+  type Deleter = Hash => UIO[Hash :+: DeleterError :+: CNil]
+  type Repository =
+    Creator :: Reader :: Updater :: Deleter :: HNil 
 }
