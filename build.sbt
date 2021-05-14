@@ -13,6 +13,7 @@ resolvers in ThisBuild ++= Seq(
 lazy val akkaVersion              = "2.6.10"
 lazy val akkaHttpVersion          = "10.2.0"
 lazy val akkaGrpcVersion          = "1.1.1"
+lazy val c3p0Version = "0.9.5.5"
 lazy val h2Version = "1.4.200"
 lazy val hikariVersion = "3.4.5"
 lazy val logbackVersion           = "1.2.3"
@@ -130,6 +131,7 @@ lazy val server =
       libraryDependencies ++= Seq(
         "com.chuusai" %% "shapeless" % shapelessVersion,
         "com.h2database" % "h2" % h2Version,
+        "com.mchange" % "c3p0" % c3p0Version,
         "com.typesafe.akka" %% "akka-actor-typed"         % akkaVersion,
         "com.typesafe.akka" %% "akka-stream"              % akkaVersion,
         "com.typesafe.akka" %% "akka-discovery"           % akkaVersion,
