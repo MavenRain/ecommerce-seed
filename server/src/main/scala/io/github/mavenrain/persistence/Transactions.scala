@@ -1,44 +1,18 @@
 package io.github.mavenrain.persistence
 
-import DatabaseSchema.productsTable
-import java.sql.Connection
-import Mode.TypeMode._
-import org.squeryl.{LazySession, Session, SessionFactory}
+import java.sql.DriverManager.getConnection
+import org.squeryl.{Session, SessionFactory}
 import org.squeryl.adapters.H2Adapter
 import scala.util.chaining.scalaUtilChainingOps
 
 object Transactions {
-  type SessionFactory = Option[() => LazySession]
-  val query = from(productsTable) {
-    product => where(product.id gt 0) select(product) orderBy(product.price.desc)
-  }
-  def products = query.toSeq
-  val insert: Product => Product =
-    productsTable.insert(_)
-  val update: Product => Unit =
-    productsTable.update(_)
-  def initializeSession =
-    Class
-        .forName("org.h2.Driver")
-        .pipe(_ =>
-          SessionFactory.concreteFactory =
-            Database.connection.select[Connection].map(connection =>
-              () => Session.create(() => connection, new H2Adapter)
-            )
-        )
-  def sessionFactory: SessionFactory =
+  def initializeSession() =
     Class
       .forName("org.h2.Driver")
       .pipe(_ =>
-        Database.connection.select[Connection].map(connection =>
-          () => Session.create(() => connection, new H2Adapter)
+        SessionFactory.concreteFactory = Some(() =>
+          Session.create(getConnection("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1", "oeo", "oeo"), new H2Adapter)
         )
       )
-  def kickTheTires =
-    transaction(
-      DatabaseSchema
-        .create
-        .pipe(_ => insert(Product(id = 1, content = "fnu43", price = BigDecimal("123.25"))))
-    )
     
 }

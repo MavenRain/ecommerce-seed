@@ -155,9 +155,11 @@ lazy val server =
         "-deprecation",
         "-Wunused:imports,privates,locals,implicits"
       ),
+      javaOptions ++= Seq("-XX:+UseG1GC","-Xmx8G"),
       Compile / mainClass := Some("com.example.server.Server"),
       buildInfoKeys ++= Seq[BuildInfoKey]("environmentMode" -> autoImport.buildEnv.value),
-      buildInfoPackage := "com.example"
+      buildInfoPackage := "com.example",
+      testOptions in Test += Tests.Argument("-oDF")
     )
     .settings(
       dockerAliases in Docker += DockerAlias(None, None, "ecommerce-seed", None),

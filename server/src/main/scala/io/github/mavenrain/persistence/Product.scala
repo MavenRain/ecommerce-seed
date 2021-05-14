@@ -3,7 +3,7 @@ package io.github.mavenrain.persistence
 import org.squeryl.KeyedEntity
 
 case class Product(
-  id: Int,
+  id: String,
   content: String,
   price: BigDecimal
-) extends KeyedEntity[Int]
+) extends KeyedEntity[String]

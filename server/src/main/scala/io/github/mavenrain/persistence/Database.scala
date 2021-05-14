@@ -17,6 +17,7 @@ object Database {
       .tap(_.setJdbcUrl("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1"))
       .tap(_.addDataSourceProperty("username", "oeo"))
       .tap(_.addDataSourceProperty("password", "oeo"))
+      .tap(_.setAutoCommit(false))
   def connection = Try(dataSource.getConnection()).fold(
     error => Error(error).inject[Connection :+: Error :+: CNil],
     _.inject[Connection :+: Error :+: CNil]
