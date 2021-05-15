@@ -5,7 +5,6 @@ import Mode.TypeMode._
 import org.junit.runner.RunWith
 import org.scalacheck.Arbitrary
 import org.scalacheck.Arbitrary.arbitrary
-import org.scalacheck.Gen.alphaNumStr
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.junit.JUnitRunner
@@ -68,18 +67,9 @@ class ProductRepositoryLaws
         RowsDeleted(_).inject[RowsDeleted :+: DeleterError :+: CNil]
       ))
   protected val createRepository: RepositoryCreator =
-    (items, hashes) => (
-        transaction(
-          items
-            .zip(hashes)
-            .collect { case (item, hash) =>
-              productsTable.insert(item.copy(id = hash))
-            }
-            .distinct
-        )
+    items =>
+      transaction(items.map(productsTable.insert(_)).distinct)
         .pipe(_ => creator :: reader :: updater :: deleter :: HNil)
-    )
-  override implicit protected val arbitraryId: Arbitrary[Hash] = Arbitrary(alphaNumStr)
   override implicit protected val arbitraryItem: Arbitrary[Item] = Arbitrary(for {
     identifier <- arbitrary[String]
     text <- arbitrary[String]

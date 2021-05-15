@@ -13,11 +13,10 @@ import zio.{IO, Runtime}
 
 trait RepositoryLaws  {
   this: AnyFlatSpec with Matchers with RepositoryProvider with ScalaCheckDrivenPropertyChecks =>
-  protected type RepositoryCreator = (Seq[Item], Seq[Hash]) => Repository
+  protected type RepositoryCreator = (Seq[Item]) => Repository
   protected val createRepository: RepositoryCreator
   protected implicit val arbitraryItem: Arbitrary[Item]
-  protected implicit val arbitraryId: Arbitrary[Hash]
-  protected def expectedItems(items: Seq[Item], hashes: Seq[Hash]): Seq[Item]
+  //protected def expectedItems(items: Seq[Item], hashes: Seq[Hash]): Seq[Item]
   protected def createSchema: Unit
   protected def hashFromItem(item: Item): Hash
 
@@ -27,19 +26,19 @@ trait RepositoryLaws  {
   createSchema
 
   it should "read an existing item" in {
-    forAll { (item: Item, hash: Hash) =>
+    forAll { (item: Item) =>
       Runtime.default.unsafeRun(
-        createRepository(Seq(item), Seq(hash))
+        createRepository(Seq(item))
           .pipe(repository =>
             repository
               .select[Reader]
-              .pipe(_(Seq(hash)))
+              .pipe(_(Seq(item).map(hashFromItem)))
               .flatMap(_.select[Seq[Item]].pipe(IO.fromOption(_)))
-              .map(_ shouldBe expectedItems(Seq(item), Seq(hash)))
+              .map(_ shouldBe Seq(item))
               .map(_ =>
                 repository
                   .select[Deleter]
-                  .pipe(_(Seq(hash)))
+                  .pipe(_(Seq(item).map(hashFromItem)))
               )
           )
       )
@@ -49,7 +48,7 @@ trait RepositoryLaws  {
   it should "create a new item" in {
     forAll { (item: Item) =>
       Runtime.default.unsafeRun(
-        createRepository(Nil, Nil)
+        createRepository(Nil)
           .pipe(repository =>
             (for {
               newItemHashes <- repository.select[Creator].pipe(_(Seq(item)))
@@ -68,8 +67,7 @@ trait RepositoryLaws  {
   it should "delete an existing item" in {
     forAll { (item: Item) =>
       Runtime.default.unsafeRun(
-        Seq(item)
-          .pipe(items => createRepository(items, items.map(hashFromItem)))
+        createRepository(Seq(item))
           .pipe(repository => for {
             possibleRowCount <- repository.select[Deleter].pipe(_(Seq(item).map(hashFromItem)))
             rowCount <- possibleRowCount.select[RowsDeleted].map(RowsDeleted.unwrap(_)).pipe(IO.fromOption(_))
