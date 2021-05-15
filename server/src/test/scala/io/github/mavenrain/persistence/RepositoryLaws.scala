@@ -13,10 +13,9 @@ import zio.{IO, Runtime}
 
 trait RepositoryLaws  {
   this: AnyFlatSpec with Matchers with RepositoryProvider with ScalaCheckDrivenPropertyChecks =>
-  protected type RepositoryCreator = (Seq[Item]) => Repository
+  protected type RepositoryCreator = Seq[Item] => Repository
   protected val createRepository: RepositoryCreator
   protected implicit val arbitraryItem: Arbitrary[Item]
-  //protected def expectedItems(items: Seq[Item], hashes: Seq[Hash]): Seq[Item]
   protected def createSchema: Unit
   protected def hashFromItem(item: Item): Hash
 
@@ -28,7 +27,8 @@ trait RepositoryLaws  {
   it should "read an existing item" in {
     forAll { (item: Item) =>
       Runtime.default.unsafeRun(
-        createRepository(Seq(item))
+        Seq(item)
+          .pipe(createRepository)
           .pipe(repository =>
             repository
               .select[Reader]
@@ -48,7 +48,8 @@ trait RepositoryLaws  {
   it should "create a new item" in {
     forAll { (item: Item) =>
       Runtime.default.unsafeRun(
-        createRepository(Nil)
+        Nil
+          .pipe(createRepository)
           .pipe(repository =>
             (for {
               newItemHashes <- repository.select[Creator].pipe(_(Seq(item)))
@@ -67,7 +68,8 @@ trait RepositoryLaws  {
   it should "delete an existing item" in {
     forAll { (item: Item) =>
       Runtime.default.unsafeRun(
-        createRepository(Seq(item))
+        Seq(item)
+          .pipe(createRepository)
           .pipe(repository => for {
             possibleRowCount <- repository.select[Deleter].pipe(_(Seq(item).map(hashFromItem)))
             rowCount <- possibleRowCount.select[RowsDeleted].map(RowsDeleted.unwrap(_)).pipe(IO.fromOption(_))
