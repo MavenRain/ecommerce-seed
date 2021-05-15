@@ -13,7 +13,7 @@ import scala.util.Try
 import scala.util.chaining.scalaUtilChainingOps
 import shapeless.{:+:, CNil, HNil}
 import shapeless.syntax.inject.InjectSyntax
-import zio.{IO, UIO}
+import zio.IO
 import zio.prelude.Newtype
 
 @RunWith(classOf[JUnitRunner])
@@ -27,8 +27,8 @@ class ProductRepositoryLaws
   type CreatorError = CreatorErrorType.Type
   object ReaderErrorType extends Newtype[Throwable]
   type ReaderError = ReaderErrorType.Type
-  object UpdateErrorType extends Newtype[Throwable]
-  type UpdaterError = UpdateErrorType.Type
+  object UpdaterErrorType extends Newtype[Throwable]
+  type UpdaterError = UpdaterErrorType.Type
   object DeleterErrorType extends Newtype[Throwable]
   type DeleterError = DeleterErrorType.Type
   type Item = Product
@@ -54,7 +54,18 @@ class ProductRepositoryLaws
         _.inject[Seq[Item] :+: ReaderError :+: CNil]
       ))
   private val updater: Updater =
-    _ => UIO.succeed(Seq[Hash]().inject[Seq[Hash] :+: UpdaterError :+: CNil])
+    updaterItems =>
+      Try(transaction(updaterItems.map(itemForHash =>
+        productsTable
+          .deleteWhere(_.id === itemForHash.select[Hash])
+          .pipe(_ => productsTable.insert(itemForHash.select[Item]))
+      )))
+      .pipe(IO.fromTry(_))
+      .either
+      .map(_.fold(
+        UpdaterErrorType(_).inject[Seq[Hash] :+: UpdaterError :+: CNil],
+        _.map(_.id).inject[Seq[Hash] :+: UpdaterError :+: CNil]
+      ))
   private val deleter: Deleter =
     deleterItems =>
       Try(transaction(

@@ -9,6 +9,7 @@ import org.squeryl.Session.create
 import org.squeryl.SessionFactory.concreteFactory
 import org.squeryl.adapters.H2Adapter
 import scala.util.chaining.scalaUtilChainingOps
+import shapeless.HNil
 import zio.{IO, Runtime}
 
 trait RepositoryLaws  {
@@ -74,6 +75,22 @@ trait RepositoryLaws  {
             possibleRowCount <- repository.select[Deleter].pipe(_(Seq(item).map(hashFromItem)))
             rowCount <- possibleRowCount.select[RowsDeleted].map(RowsDeleted.unwrap(_)).pipe(IO.fromOption(_))
           } yield rowCount shouldBe 1)
+      )
+    }
+  }
+
+  it should "update an existing item" in {
+    forAll { (original: Item, replacement: Item) =>
+      Runtime.default.unsafeRun(
+        Seq(original)
+          .pipe(createRepository)
+          .pipe(repository =>
+            repository
+              .select[Updater]
+              .pipe(_(Seq(original.pipe(hashFromItem) :: replacement :: HNil)))
+              .flatMap(_.select[Seq[Hash]].pipe(IO.fromOption(_)))
+              .map(_ shouldBe Seq(replacement.pipe(hashFromItem)))
+          )
       )
     }
   }
